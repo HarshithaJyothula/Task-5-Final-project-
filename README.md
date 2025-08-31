@@ -37,8 +37,8 @@ Handling dynamic UI updates with JavaScript
 Designing responsive layouts with CSS
 Implementing basic e-commerce functionality
 
-💡 Future Enhancement
-s
+💡 Future Enhancements
+
 ✅ Product search and filter by category
 ✅ User login and wishlist
 ✅ Backend integration with database
@@ -46,4 +46,5 @@ s
 👩‍💻 Author
 
 Harshitha Jyothula
+
 Developed as a Capstone Project during training at Apex Plant 🌱
