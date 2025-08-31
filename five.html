@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Capstone E-Commerce Project</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        background: #f7f7f7;
+        color: #222;
+      }
+      header {
+        background: #4a148c;
+        color: #fff;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+      /* cart button in header */
+      .cart-btn {
+        background: transparent;
+        border: 0;
+        color: #fff;
+        cursor: pointer;
+        font-size: 1.2rem;
+        position: relative;
+        padding: 6px 10px;
+        border-radius: 6px;
+      }
+      .cart-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: #ff5252;
+        color: #fff;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        padding: 0 5px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+
+      .categories {
+        text-align: center;
+        padding: 12px 0;
+      }
+      .categories button {
+        margin: 6px;
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: 0;
+        background: #7b1fa2;
+        color: #fff;
+        cursor: pointer;
+      }
+      .categories button:hover {
+        background: #9c27b0;
+      }
+
+      .main {
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        align-items: flex-start;
+      }
+      .products {
+        flex: 3;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .product {
+        background: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        text-align: center;
+      }
+      .product img {
+        display: block;
+        margin: 0 auto 8px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+      .product h3 {
+        margin: 6px 0;
+        font-size: 16px;
+      }
+      .stars {
+        color: gold;
+        margin-bottom: 6px;
+      }
+      .price {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .add-btn {
+        background: #4a148c;
+        color: #fff;
+        border: 0;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .add-btn:hover {
+        filter: brightness(0.95);
+      }
+
+      .cart-panel {
+        width: 340px;
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .cart-panel.hidden {
+        display: none;
+      }
+      .cart-panel h2 {
+        margin: 0 0 10px 0;
+      }
+      .cart-items {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 64vh;
+        overflow: auto;
+      }
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 6px;
+        border-bottom: 1px solid #eee;
+        gap: 8px;
+      }
+      .cart-item-info {
+        flex: 1;
+      }
+      .cart-controls {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .qty-btn {
+        background: #eee;
+        border: 0;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .remove-btn {
+        background: #ff5252;
+        border: 0;
+        color: #fff;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .cart-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .clear-btn {
+        background: #ddd;
+        border: 0;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      /* responsive */
+      @media (max-width: 900px) {
+        .products {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .cart-panel {
+          width: 300px;
+        }
+      }
+      @media (max-width: 600px) {
+        .main {
+          flex-direction: column;
+        }
+        .products {
+          grid-template-columns: repeat(1, 1fr);
+        }
+        .cart-panel {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Capstone E-Commerce Project</h1>
+      <div>
+        <button id="cartToggle" class="cart-btn" aria-label="Toggle cart">
+          🛒
+          <span id="cartCount" class="cart-badge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="categories">
+      <button onclick="filterProducts('all')">All</button>
+      <button onclick="filterProducts('electronics')">Electronics</button>
+      <button onclick="filterProducts('fashion')">Fashion</button>
+      <button onclick="filterProducts('grocery')">Grocery</button>
+    </div>
+
+    <div class="main">
+      <div class="products" id="productsGrid">
+        <!-- 20 products (images include width/height in markup) -->
+        <!-- Electronics -->
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.58.27 PM.jpeg"
+            alt="Laptop"
+            width="200"
+            height="180"
+          />
+          <h3>Laptop</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$750.00</div>
+          <button class="add-btn" data-name="Laptop" data-price="750">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 5.51.04 PM.jpeg"
+            alt="Headphones"
+            width="200"
+            height="180"
+          />
+          <h3>Headphones</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$50.00</div>
+          <button class="add-btn" data-name="Headphones" data-price="50">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.27.59 PM.jpeg"
+            alt="Smartphone"
+            width="200"
+            height="180"
+          />
+          <h3>Smartphone</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$400.00</div>
+          <button class="add-btn" data-name="Smartphone" data-price="400">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.29.55 PM.jpeg"
+            alt="Smartwatch"
+            width="200"
+            height="180"
+          />
+          <h3>Smartwatch</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$120.00</div>
+          <button class="add-btn" data-name="Smartwatch" data-price="120">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.31.17 PM.jpeg"
+            alt="Tablet"
+            width="200"
+            height="180"
+          />
+          <h3>Tablet</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$300.00</div>
+          <button class="add-btn" data-name="Tablet" data-price="300">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.32.36 PM.jpeg"
+            alt="Camera"
+            width="200"
+            height="180"
+          />
+          <h3>Camera</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$600.00</div>
+          <button class="add-btn" data-name="Camera" data-price="600">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="electronics">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.32.47 PM.jpeg"
+            alt="Speaker"
+            width="200"
+            height="180"
+          />
+          <h3>Speaker</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$80.00</div>
+          <button class="add-btn" data-name="Speaker" data-price="80">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Fashion -->
+        <div class="product" data-category="fashion">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.34.44 PM.jpeg"
+            alt="Jeans"
+            width="200"
+            height="180"
+          />
+          <h3>Jeans</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$40.00</div>
+          <button class="add-btn" data-name="Jeans" data-price="40">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="fashion">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.35.17 PM.jpeg"
+            alt="T-Shirt"
+            width="200"
+            height="180"
+          />
+          <h3>T-Shirt</h3>
+          <div class="stars">★★★☆☆</div>
+          <div class="price">$20.00</div>
+          <button class="add-btn" data-name="T-Shirt" data-price="20">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="fashion">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.37.13 PM.jpeg"
+            alt="Shoes"
+            width="200"
+            height="180"
+          />
+          <h3>Shoes</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$60.00</div>
+          <button class="add-btn" data-name="Shoes" data-price="60">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="fashion">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.37.32 PM.jpeg"
+            alt="Jacket"
+            width="200"
+            height="180"
+          />
+          <h3>Jacket</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$100.00</div>
+          <button class="add-btn" data-name="Jacket" data-price="100">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="fashion">
+          <img src="WhatsApp Image 2025-08-31 at 6.42.52 PM.jpeg"width="200"
+          height="180"" alt="Dress" width="200" height="180" />
+          <h3>Dress</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$80.00</div>
+          <button class="add-btn" data-name="Dress" data-price="80">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="fashion">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.38.05 PM.jpeg"
+            alt="Cap"
+            width="200"
+            height="180"
+          />
+          <h3>Cap</h3>
+          <div class="stars">★★★☆☆</div>
+          <div class="price">$15.00</div>
+          <button class="add-btn" data-name="Cap" data-price="15">
+            Add to Cart
+          </button>
+        </div>
+
+        <!-- Grocery -->
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.46.56 PM.jpeg"
+            alt="Milk"
+            width="200"
+            height="180"
+          />
+          <h3>Milk</h3>
+          <div class="stars">★★★☆☆</div>
+          <div class="price">$5.00</div>
+          <button class="add-btn" data-name="Milk" data-price="5">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.47.08 PM.jpeg"
+            alt="Bread"
+            width="200"
+            height="180"
+          />
+          <h3>Bread</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$3.00</div>
+          <button class="add-btn" data-name="Bread" data-price="3">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.47.28 PM.jpeg"
+            alt="Eggs"
+            width="200"
+            height="180"
+          />
+          <h3>Eggs</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$4.00</div>
+          <button class="add-btn" data-name="Eggs" data-price="4">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.47.38 PM.jpeg"
+            alt="Rice"
+            width="200"
+            height="180"
+          />
+          <h3>Rice</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$15.00</div>
+          <button class="add-btn" data-name="Rice" data-price="15">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.48.27 PM.jpeg"
+            alt="Oil"
+            width="200"
+            height="180"
+          />
+          <h3>Oil</h3>
+          <div class="stars">★★★★☆</div>
+          <div class="price">$12.00</div>
+          <button class="add-btn" data-name="Oil" data-price="12">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.48.06 PM.jpeg"
+            alt="Sugar"
+            width="200"
+            height="180"
+          />
+          <h3>Sugar</h3>
+          <div class="stars">★★★☆☆</div>
+          <div class="price">$8.00</div>
+          <button class="add-btn" data-name="Sugar" data-price="8">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product" data-category="grocery">
+          <img
+            src="WhatsApp Image 2025-08-31 at 6.49.04 PM.jpeg"
+            alt="Coffee"
+            width="200"
+            height="180"
+          />
+          <h3>Coffee</h3>
+          <div class="stars">★★★★★</div>
+          <div class="price">$20.00</div>
+          <button class="add-btn" data-name="Coffee" data-price="20">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+
+      <div class="cart-panel" id="cartPanel">
+        <h2>Cart</h2>
+        <ul id="cartItems" class="cart-items"></ul>
+        <div class="cart-footer">
+          <div>
+            <div>Total</div>
+            <div style="font-weight: 700; font-size: 1.05rem">
+              $<span id="cartTotal">0.00</span>
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              align-items: flex-end;
+            "
+          >
+            <button class="clear-btn" id="clearCart">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // cart structure: { name, price, qty }
+      const cart = [];
+
+      const cartCountEl = document.getElementById("cartCount");
+      const cartItemsEl = document.getElementById("cartItems");
+      const cartTotalEl = document.getElementById("cartTotal");
+      const cartToggle = document.getElementById("cartToggle");
+      const cartPanel = document.getElementById("cartPanel");
+      const clearCartBtn = document.getElementById("clearCart");
+
+      // toggle cart panel
+      cartToggle.addEventListener("click", () => {
+        cartPanel.classList.toggle("hidden");
+      });
+
+      // handle add buttons (delegation)
+      document.getElementById("productsGrid").addEventListener("click", (e) => {
+        const btn = e.target.closest(".add-btn");
+        if (!btn) return;
+        const name = btn.dataset.name;
+        const price = parseFloat(btn.dataset.price);
+        addToCart(name, price);
+      });
+
+      function addToCart(name, price) {
+        const existing = cart.find((i) => i.name === name);
+        if (existing) existing.qty += 1;
+        else cart.push({ name, price, qty: 1 });
+        renderCart();
+      }
+
+      function increment(name) {
+        const it = cart.find((i) => i.name === name);
+        if (it) {
+          it.qty += 1;
+          renderCart();
+        }
+      }
+      function decrement(name) {
+        const it = cart.find((i) => i.name === name);
+        if (!it) return;
+        it.qty -= 1;
+        if (it.qty <= 0) removeItem(name);
+        else renderCart();
+      }
+      function removeItem(name) {
+        const idx = cart.findIndex((i) => i.name === name);
+        if (idx > -1) cart.splice(idx, 1);
+        renderCart();
+      }
+      function clearCart() {
+        cart.length = 0;
+        renderCart();
+      }
+      clearCartBtn.addEventListener("click", clearCart);
+
+      function renderCart() {
+        // render items
+        cartItemsEl.innerHTML = "";
+        let total = 0;
+        let count = 0;
+        cart.forEach((item) => {
+          total += item.price * item.qty;
+          count += item.qty;
+          const li = document.createElement("li");
+          li.className = "cart-item";
+          li.innerHTML = `
+          <div class="cart-item-info">
+            <div style="font-weight:600">${item.name}</div>
+            <div style="font-size:13px;color:#666">$${item.price.toFixed(
+              2
+            )} x ${item.qty} = <strong>$${(item.price * item.qty).toFixed(
+            2
+          )}</strong></div>
+          </div>
+          <div class="cart-controls">
+            <button class="qty-btn" data-action="dec" data-name="${
+              item.name
+            }">−</button>
+            <div style="min-width:20px;text-align:center">${item.qty}</div>
+            <button class="qty-btn" data-action="inc" data-name="${
+              item.name
+            }">+</button>
+            <button class="remove-btn" data-action="remove" data-name="${
+              item.name
+            }">Remove</button>
+          </div>
+        `;
+          cartItemsEl.appendChild(li);
+        });
+
+        // total & badge
+        cartTotalEl.textContent = total.toFixed(2);
+        cartCountEl.textContent = count;
+        cartCountEl.style.display = count > 0 ? "inline-flex" : "none";
+
+        // attach controls (delegation)
+        cartItemsEl.querySelectorAll("[data-action]").forEach((btn) => {
+          const action = btn.dataset.action;
+          const name = btn.dataset.name;
+          btn.onclick = () => {
+            if (action === "inc") increment(name);
+            if (action === "dec") decrement(name);
+            if (action === "remove") removeItem(name);
+          };
+        });
+      }
+
+      // expose filter function to inline buttons
+      function filterProducts(category) {
+        document.querySelectorAll(".product").forEach((p) => {
+          p.style.display =
+            category === "all" || p.dataset.category === category
+              ? "block"
+              : "none";
+        });
+      }
+      window.filterProducts = filterProducts;
+
+      // initial render
+      renderCart();
+    </script>
+  </body>
+</html>
